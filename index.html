@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background-color: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .container {
+            background: rgb(8, 243, 239);
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            text-align: center;
+            max-width: 28rem;
+            width: 100%;
+        }
+
+        .timer-display {
+            font-size: 3.75rem;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 2rem;
+        }
+
+        .input-section {
+            margin-bottom: 1rem;
+        }
+
+        .time-input {
+            width: 8rem;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            text-align: center;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .time-input:disabled {
+            background-color: #f9fafb;
+            color: #6b7280;
+        }
+
+        .select-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 8rem;
+        }
+
+        .time-select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            background: white;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            background: white;
+            color: #374151;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 1.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Timer Display -->
+        <div class="timer-display" id="timerDisplay">00:50</div>
+
+        <!-- Input Section -->
+        <div class="input-section">
+            <input 
+                type="number" 
+                id="timeInput" 
+                class="time-input" 
+                value="50" 
+                min="1" 
+                placeholder="Enter time"
+            />
+        </div>
+
+        <!-- Time Unit Selector -->
+        <div class="select-wrapper">
+            <select id="timeUnit" class="time-select">
+                <option value="seconds">Seconds</option>
+                <option value="minutes">Minutes</option>
+                <option value="hours">Hours</option>
+            </select>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="controls">
+            <button id="startBtn" class="btn">Start</button>
+            <button id="stopBtn" class="btn" disabled>Stop</button>
+            <button id="resetBtn" class="btn">Reset</button>
+        </div>
+
+        <!-- Time finished message -->
+        <div id="message" class="message" style="display: none;">Time's up! 🎉</div>
+    </div>
+
+    <script>
+        let time = 50; // Current countdown time in seconds
+        let initialTime = 50; // Initial time to reset to
+        let inputValue = 50; // Current input value
+        let isRunning = false; // Timer running state
+        let timeUnit = "seconds"; // Current time unit
+        let intervalId = null; // Interval reference
+
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timeInput = document.getElementById('timeInput');
+        const timeUnitSelect = document.getElementById('timeUnit');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const message = document.getElementById('message');
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            timerDisplay.textContent = formatTime(time);
+            
+            // Update button states
+            startBtn.disabled = isRunning || time === 0;
+            stopBtn.disabled = !isRunning;
+            timeInput.disabled = isRunning;
+            
+            // Show/hide message
+            if (time === 0) {
+                message.style.display = 'block';
+            } else {
+                message.style.display = 'none';
+            }
+        }
+
+        function startTimer() {
+            if (isRunning && time > 0) {
+                intervalId = setInterval(() => {
+                    time--;
+                    if (time <= 0) {
+                        time = 0;
+                        isRunning = false;
+                        clearInterval(intervalId);
+                        intervalId = null;
+                    }
+                    updateDisplay();
+                }, 1000);
+            }
+        }
+
+        function stopTimer() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+        }
+
+        function handleStart() {
+            if (time > 0) {
+                isRunning = true;
+                updateDisplay();
+                startTimer();
+            }
+        }
+
+        function handleStop() {
+            isRunning = false;
+            stopTimer();
+            updateDisplay();
+        }
+
+        function handleReset() {
+            isRunning = false;
+            stopTimer();
+            time = initialTime;
+            updateDisplay();
+        }
+
+        function handleInputChange() {
+            const value = parseInt(timeInput.value) || 0;
+            inputValue = value;
+            initialTime = value;
+
+            let newTime = value;
+            if (timeUnit === 'minutes') {
+                newTime = value * 60;
+            } else if (timeUnit === 'hours') {
+                newTime = value * 3600;
+            }
+            
+            time = newTime;
+            isRunning = false;
+            stopTimer();
+            updateDisplay();
+        }
+
+        function handleTimeUnitChange() {
+            timeUnit = timeUnitSelect.value;
+            let newTime = inputValue;
+            
+            if (timeUnit === 'minutes') {
+                newTime = inputValue * 60;
+            } else if (timeUnit === 'hours') {
+                newTime = inputValue * 3600;
+            }
+            
+            time = newTime;
+            isRunning = false;
+            stopTimer();
+            updateDisplay();
+        }
+
+        startBtn.addEventListener('click', handleStart);
+        stopBtn.addEventListener('click', handleStop);
+        resetBtn.addEventListener('click', handleReset);
+        timeInput.addEventListener('input', handleInputChange);
+        timeUnitSelect.addEventListener('change', handleTimeUnitChange);
+
+        updateDisplay();
+    </script>
+</body>
+</html>
