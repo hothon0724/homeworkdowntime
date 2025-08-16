@@ -121,7 +121,7 @@
                 type="number" 
                 id="timeInput" 
                 class="time-input" 
-                value="50" 
+                value="00" 
                 min="1" 
                 placeholder="Enter time"
             />
@@ -148,9 +148,9 @@
     </div>
 
     <script>
-        let time = 50; // Current countdown time in seconds
-        let initialTime = 50; // Initial time to reset to
-        let inputValue = 50; // Current input value
+        let time = 0; // Current countdown time in seconds
+        let initialTime = 0; // Initial time to reset to
+        let inputValue = 0; // Current input value
         let isRunning = false; // Timer running state
         let timeUnit = "seconds"; // Current time unit
         let intervalId = null; // Interval reference
